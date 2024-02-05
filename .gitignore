@@ -1,3 +1,4 @@
 node_modules
 *.vue
 .DS_Store
+coverage
