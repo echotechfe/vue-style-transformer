@@ -1,4 +1,4 @@
-import { getVal, transformImportant } from './utils'
+import { transformImportant } from './utils'
 
 export function text(key: string, val: string) {
   const [value, important] = transformImportant(val)

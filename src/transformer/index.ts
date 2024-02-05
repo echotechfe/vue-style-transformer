@@ -12,8 +12,10 @@ import { max } from './max'
 import { size } from './size'
 import { color } from './color'
 import { font } from './font'
+import { background } from './background'
+import { border } from './border'
 
-const propertyMap: any = {
+const propertyMap: Record<string, Function> = {
   flex,
   display,
   align,
@@ -35,6 +37,8 @@ const propertyMap: any = {
   text,
   color,
   font,
+  background,
+  border,
   opacity,
   vertical,
   overflow,
@@ -64,5 +68,5 @@ export function toUnoCSS(css: String) {
   }
 }
 
-const ret = toUnoCSS('color: #1677ff')
+const ret = toUnoCSS('border-color: var(--orange);')
 console.log('ret', ret)
