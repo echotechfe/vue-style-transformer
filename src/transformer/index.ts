@@ -13,6 +13,7 @@ import { size } from './size'
 import { color } from './color'
 import { font } from './font'
 import { background } from './background'
+import { border } from './border'
 
 const propertyMap: Record<string, Function> = {
   flex,
@@ -37,6 +38,7 @@ const propertyMap: Record<string, Function> = {
   color,
   font,
   background,
+  border,
   opacity,
   vertical,
   overflow,
@@ -66,5 +68,5 @@ export function toUnoCSS(css: String) {
   }
 }
 
-const ret = toUnoCSS('background-color: #F40')
+const ret = toUnoCSS('border-color: var(--orange);')
 console.log('ret', ret)
