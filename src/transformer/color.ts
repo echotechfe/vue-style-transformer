@@ -1,11 +1,11 @@
 import { transformImportant, isHex, transformColorToKey } from './utils'
 
-export function color(key: string, val: string) {
+export function color(_: string, val: string, prefix: string = 'c') {
   const [value, important] = transformImportant(val)
   const color = transformColorToKey(value)
   if (color) {
-    return `c-${color}${important}`
+    return `${prefix}-${color}${important}`
   } else if (isHex(value)) {
-    return `c-${value.replace('#', 'hex-')}${important}`
+    return `${prefix}-${value.replace('#', 'hex-')}${important}`
   }
 }
