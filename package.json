@@ -4,18 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run --coverage --dir ./test",
     "start": "esno src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^20.11.10",
     "@vue/compiler-sfc": "^3.4.15",
     "esno": "^4.0.0",
     "gogocode": "^1.0.55",
     "postcss": "^8.4.33",
     "sass": "^1.70.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.10",
+    "@vitest/coverage-istanbul": "^1.2.2",
+    "vitest": "^1.2.2"
   }
 }
