@@ -68,5 +68,5 @@ export function toUnoCSS(css: String) {
   }
 }
 
-const ret = toUnoCSS('border-color: var(--orange);')
+const ret = toUnoCSS('border-radius: 25% 10%;')
 console.log('ret', ret)

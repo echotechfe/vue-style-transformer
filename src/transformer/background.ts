@@ -8,4 +8,14 @@ export function background(key: string, val: string) {
       return `${val}${important}`
     }
   }
+  if (key === 'background') {
+    const values = value.split(' ')
+    const len = values.length
+    if (len === 1) {
+      const val = color(key, value, 'bg')
+      if (val) {
+        return `${val}${important}`
+      }
+    }
+  }
 }

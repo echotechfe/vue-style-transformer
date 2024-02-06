@@ -29,6 +29,14 @@ export function isSupportValue(v: string) {
   return !/(calc|var|url|linear-gradient)/.test(v)
 }
 
+export function replaceUnit(v: string) {
+  return v.replace(
+    /([0-9\.]+)(rpx|px)/g,
+    (_: string, v: string, unit: string) =>
+      `${unit === 'rpx' ? (+v / 2).toFixed(0) : v}`
+  )
+}
+
 export function transformImportant(v: string) {
   v = v
     .replace(/\s+/, ' ')

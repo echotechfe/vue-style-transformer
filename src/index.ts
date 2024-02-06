@@ -73,7 +73,7 @@ async function transform(code: string) {
     })
 }
 
-fs.readFile('./src/index.vue', 'utf-8', async (err, data) => {
+fs.readFile('./test/index.vue', 'utf-8', async (err, data) => {
   if (err) {
     throw err
   }
