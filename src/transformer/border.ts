@@ -35,15 +35,12 @@ export function border(key: string, val: string) {
   }
   const lastProperty = getLastProperty(key)
   if (lastProperty === 'radius') {
-    const regex =
-      /border-(top|right|bottom|left)(?:-(left|right))?-(?:radius)\s*/
+    const regex = /border-(top|bottom)-(left|right)-radius\s*/
     const match = key.match(regex)
     if (!match) return
-    const [, direction, lr] = match
-    if (direction && !lr) {
-      return `rd-${direction[0]}-${value}${important}`
-    } else if (direction && lr) {
-      return `rd-${direction[0]}${lr[0]}-${value}${important}`
+    const [, vertical, horizontal] = match
+    if (vertical && horizontal) {
+      return `rd-${vertical[0]}${horizontal[0]}-${value}${important}`
     }
   }
 }

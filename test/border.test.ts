@@ -23,6 +23,6 @@ test('border-radius', () => {
   expect(border('border-radius', '10rpx 30rpx 30rpx 10rpx')).toBe(
     'rd-l-10rpx rd-r-30rpx'
   )
-  expect(border('border-bottom-radius', '10rpx')).toBe('rd-b-10rpx')
   expect(border('border-top-left-radius', '10rpx')).toBe('rd-tl-10rpx')
+  expect(border('border-bottom-right-radius', '10rpx')).toBe('rd-br-10rpx')
 })
