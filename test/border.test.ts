@@ -26,3 +26,7 @@ test('border-radius', () => {
   expect(border('border-top-left-radius', '10rpx')).toBe('rd-tl-10rpx')
   expect(border('border-bottom-right-radius', '10rpx')).toBe('rd-br-10rpx')
 })
+
+test('border-color', () => {
+  expect(border('border-color', '#000')).toBe('b-black')
+})
