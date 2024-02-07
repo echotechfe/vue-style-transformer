@@ -29,6 +29,10 @@ export function isSupportValue(v: string) {
   return !/(calc|var|url|linear-gradient)/.test(v)
 }
 
+export function joinWithLine(s: string) {
+  return s.replace(/\s+/, ' ').split(' ').join('-')
+}
+
 export function replaceUnit(v: string) {
   return v.replace(
     /([0-9\.]+)(rpx|px)/g,
