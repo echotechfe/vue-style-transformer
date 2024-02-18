@@ -1,11 +1,46 @@
-import { compilerCss } from './compilerCss'
-import { prettierCode } from './prettierCode'
 import $ from 'gogocode'
 import { parse } from '@vue/compiler-sfc'
-import fs from 'fs'
 import postcss from 'postcss'
+import { compilerCss } from './compilerCss'
+import { toUnoCSS } from './transformer/index'
+import { processCss } from './processCss'
 
-async function transform(code: string) {
+type RemoveCSSType = {
+  className: string
+  key: string
+  val: string
+}
+
+function getCSSRules(css: string, className: string) {
+  const rules: string[] = []
+  postcss.parse(css).walkRules((rule) => {
+    const regex = new RegExp(`\\.${className}(\\s*\\{|\\s*$|\\s*,)`)
+    if (rule.selectors.some((selector) => regex.test(selector))) {
+      rule.walkDecls((decl) => {
+        const declaration = `${decl.prop}: ${decl.value};`
+        rules.push(declaration)
+      })
+    }
+  })
+  return rules
+}
+
+function unique(removeCSS: RemoveCSSType[]) {
+  const uniqueRules = new Set()
+  const uniqueRemoveCSS: RemoveCSSType[] = []
+
+  removeCSS.forEach((item) => {
+    const identifier = `${item.className}|${item.key}|${item.val}`
+    if (!uniqueRules.has(identifier)) {
+      uniqueRules.add(identifier)
+      uniqueRemoveCSS.push(item)
+    }
+  })
+
+  return uniqueRemoveCSS
+}
+
+export async function transform(code: string) {
   const {
     descriptor: { styles },
     errors,
@@ -13,7 +48,7 @@ async function transform(code: string) {
   if (errors.length) return code
 
   const { content: style } = styles[0]
-  const css = await compilerCss(style)
+  let css = await compilerCss(style)
   code = code.replace(style, `\n${css}\n`)
 
   const classNames: string[] = []
@@ -35,47 +70,129 @@ async function transform(code: string) {
     },
   })
 
+  const removeCSS: RemoveCSSType[] = []
+
   ast
     .find('<template></template>')
     .find([`<$_$ :class="$_$1" $$$0>$$$1</$_$>`, `<$_$ :class="$_$1" $$$0/>`])
     .each((node) => {
-      // find <div :class="">xxx</div> or <div :class=""/> and replace
       const newContent = $(node.match[1][0].value)
         .find(`{$_$:$_$1}`)
         .each((n) => {
-          n.match[0].forEach(({ value }) => {
+          n.match[0].forEach(async ({ value }) => {
             if (classNames.includes(value)) {
-              console.log('class value', value)
-
-              const rules: any[] = []
-
-              postcss.parse(css).walkRules(`.${value}`, (rule) => {
-                rule.each((e) => {
-                  const value = e.toString()
-                  rules.push(value)
-                })
-              })
-
+              const rules = getCSSRules(css, value)
+              const ret: string[] = []
               const splitReg = /([\w-]+)\s*:\s*([.\w\(\)-\s%+'",#\/!]+)/
               rules.map((rule) => {
-                const match = css.match(splitReg)
+                const match = rule.match(splitReg)
                 if (!match) return
-                const [_, key, val] = match
-                console.log('match', match)
+                const [declaration, key, val] = match
+                const res = toUnoCSS(declaration)
+                if (res) {
+                  removeCSS.push({ className: value, key, val })
+                  ret.push(res)
+                }
               })
 
-              const ret = []
-
-              n.replace(`{'${value}': $_$,$$$}`, `{'${value}': $_$,$$$}`)
+              if (ret.length) {
+                n.replace(
+                  `{'${value}': $_$,$$$}`,
+                  `{'${value} ${ret.join(' ')}': $_$,$$$}`
+                )
+              }
             }
           })
         })
+        .root()
+        .find(`"$_$"`)
+        .each((n) => {
+          n.match[0].forEach(async ({ value }) => {
+            if (classNames.includes(value)) {
+              const rules = getCSSRules(css, value)
+              const ret: string[] = []
+              const splitReg = /([\w-]+)\s*:\s*([.\w\(\)-\s%+'",#\/!]+)/
+              rules.map((rule) => {
+                const match = rule.match(splitReg)
+                if (!match) return
+                const [declaration, key, val] = match
+                const res = toUnoCSS(declaration)
+                if (res) {
+                  removeCSS.push({ className: value, key, val })
+                  ret.push(res)
+                }
+              })
+              if (ret.length) {
+                n.replace(`"${value}"`, `"${value} ${ret.join(' ')}"`)
+              }
+            }
+          })
+        })
+        .root()
+        .generate()
+      const nodeContent = node.match[1][0].node
+      Object.assign(nodeContent, {
+        content: newContent.replace(/"/g, "'"),
+      })
     })
-}
+    .root()
+    .find('<template></template>')
+    .find([`<$_$ class="$_$1" $$$1>$$$2</$_$>`, `<$_$ class="$_$1" $$$1/>`])
+    .each((node) => {
+      const classList = node.match[1][0].value.split(' ')
+      let hasMatched = false
+      classList.forEach((i, idx) => {
+        if (classNames.includes(i)) {
+          hasMatched = true
+          classList[idx] = `'${i}'`
+        }
+      })
 
-fs.readFile('./test/index.vue', 'utf-8', async (err, data) => {
-  if (err) {
-    throw err
+      if (hasMatched) {
+        const newContentAst = $(JSON.stringify(classList))
+        newContentAst.find(`'$_$'`).each((n) => {
+          const str = n.match[0][0].value
+          if (str.startsWith("'") && str.endsWith("'")) {
+            const value = str.replace(/'/g, '')
+            const rules = getCSSRules(css, value)
+            const ret: string[] = []
+            const splitReg = /([\w-]+)\s*:\s*([.\w\(\)-\s%+'",#\/!]+)/
+            rules.map((rule) => {
+              const match = rule.match(splitReg)
+              if (!match) return
+              const [declaration, key, val] = match
+              const res = toUnoCSS(declaration)
+              if (res) {
+                removeCSS.push({ className: value, key, val })
+                ret.push(res)
+              }
+            })
+            if (ret.length) {
+              n.replaceBy(`'${value} ${ret.join(' ')}'`)
+            }
+          }
+        })
+
+        const nodeContent = node.match[1][0].node
+        Object.assign(nodeContent, {
+          content: JSON.parse(newContentAst.generate()).join(' '),
+        })
+      }
+    })
+
+  for (const task of unique(removeCSS)) {
+    css = await processCss(css, task.className, task.key, task.val)
   }
-  await transform(data)
-})
+  const cssCode = postcss()
+    .use((root: postcss.Root) => {
+      root.walkRules((rule) => {
+        if (rule.nodes.length === 0) {
+          rule.remove() // 删除空的规则
+        }
+      })
+    })
+    .process(css, { from: undefined })
+    .toString()
+  ;(ast as any).rootNode.node.styles[0].content = `\n${cssCode}\n`
+  return ast.generate({ isPretty: true })
+}

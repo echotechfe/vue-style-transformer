@@ -14,11 +14,13 @@ import { color } from './color'
 import { font } from './font'
 import { background } from './background'
 import { border } from './border'
+import { justify } from './justify'
 
 const propertyMap: Record<string, Function> = {
   flex,
   display,
   align,
+  justify,
   gap,
   row: gap,
   column: gap,
@@ -30,6 +32,7 @@ const propertyMap: Record<string, Function> = {
   right: gap,
   bottom: gap,
   left: gap,
+  z: size,
   max,
   min: max,
   width: size,
@@ -52,9 +55,7 @@ export function toUnoCSS(css: String) {
   // calc | var | url | linear-gradient | rgba | rgb
   if (!isSupportValue(value)) return
 
-  console.log('declaration', declaration)
   const firstProperty = getFirstProperty(property)
-  console.log('firstProperty', firstProperty)
   const result = propertyMap[firstProperty]?.(property, value)
   if (result) {
     const replace2rpx = result.replace(
@@ -62,11 +63,6 @@ export function toUnoCSS(css: String) {
       (_: string, v: string, unit: string) =>
         `-${unit === 'rpx' ? (+v / 2).toFixed(0) : v}`
     )
-
-    console.log('replace2rpx', replace2rpx)
     return replace2rpx
   }
 }
-
-const ret = toUnoCSS('border-color: red;')
-console.log('ret', ret)

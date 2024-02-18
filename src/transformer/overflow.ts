@@ -5,4 +5,5 @@ export function overflow(key: string, val: string) {
   if (key === 'overflow') {
     return `overflow-${value}${important}`
   }
+  return `${key}-${value}${important}`
 }
