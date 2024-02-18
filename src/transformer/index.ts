@@ -12,6 +12,7 @@ import { max } from './max'
 import { size } from './size'
 import { color } from './color'
 import { font } from './font'
+import { line } from './line'
 import { background } from './background'
 import { border } from './border'
 import { justify } from './justify'
@@ -40,6 +41,7 @@ const propertyMap: Record<string, Function> = {
   text,
   color,
   font,
+  line,
   background,
   border,
   opacity,
