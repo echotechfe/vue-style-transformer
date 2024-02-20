@@ -1,6 +1,7 @@
 import $ from 'gogocode'
 import { parse } from '@vue/compiler-sfc'
 import postcss from 'postcss'
+import synchronizedPrettier from '@prettier/sync'
 import { compilerCss } from './compilerCss'
 import { reversedShortCuts } from './transformer/consts'
 import { toUnoCSS } from './transformer/index'
@@ -59,7 +60,7 @@ export async function transform(code: string) {
     errors,
   } = parse(code)
   if (errors.length) return code
-
+  if (!styles.length) return code
   const { content: style } = styles[0]
   let css = await compilerCss(style)
   code = code.replace(style, `\n${css}\n`)
@@ -112,7 +113,7 @@ export async function transform(code: string) {
                 const replaceRet = replaceShortcuts(ret)
                 n.replace(
                   `{'${value}': $_$,$$$}`,
-                  `{'${value} ${replaceRet.join(' ')}': $_$,$$$}`
+                  `{'${value} ${replaceRet.join(' ')}': $_$,$$$}`,
                 )
               }
             }
@@ -210,5 +211,13 @@ export async function transform(code: string) {
     .process(css, { from: undefined })
     .toString()
   ;(ast as any).rootNode.node.styles[0].content = `\n${cssCode}\n`
-  return ast.generate({ isPretty: true })
+  const vueCode = ast.generate({ isPretty: true })
+  const prettierVueCode = synchronizedPrettier.format(vueCode, {
+    parser: 'vue',
+    semi: false,
+    tabWidth: 2,
+    singleQuote: true,
+    htmlWhitespaceSensitivity: 'ignore',
+  })
+  return prettierVueCode
 }
