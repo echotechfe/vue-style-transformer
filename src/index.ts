@@ -192,7 +192,9 @@ export async function transform(code: string) {
 
         const nodeContent = node.match[1][0].node
         Object.assign(nodeContent, {
-          content: JSON.parse(newContentAst.generate()).join(' '),
+          content: JSON.parse(newContentAst.generate())
+            .join(' ')
+            .replaceAll(/\'/g, ''),
         })
       }
     })
