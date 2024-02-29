@@ -3,7 +3,7 @@ import { parse } from '@vue/compiler-sfc'
 import postcss from 'postcss'
 import synchronizedPrettier from '@prettier/sync'
 import { compilerCss } from './compilerCss'
-import { reversedShortCuts } from './transformer/consts'
+import { replaceShortcuts } from './transformer'
 import { toUnoCSS } from './transformer/index'
 import { processCss } from './processCss'
 
@@ -40,18 +40,6 @@ function unique(removeCSS: RemoveCSSType[]) {
   })
 
   return uniqueRemoveCSS
-}
-
-function replaceShortcuts(classArray: string[]) {
-  Object.entries(reversedShortCuts).forEach(([classList, shortcut]) => {
-    const classListArray = classList.split(' ').sort()
-    const classListSet = new Set(classListArray)
-    if (classListArray.every((cls) => classArray.includes(cls))) {
-      classArray = classArray.filter((cls) => !classListSet.has(cls))
-      classArray.push(shortcut as string)
-    }
-  })
-  return classArray
 }
 
 export async function transform(code: string) {

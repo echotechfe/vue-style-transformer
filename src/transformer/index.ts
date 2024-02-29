@@ -1,3 +1,4 @@
+import { reversedShortCuts } from './consts'
 import { getFirstProperty, isSupportValue } from './utils'
 import { display } from './display'
 import { flex } from './flex'
@@ -68,3 +69,16 @@ export function toUnoCSS(css: String): string | undefined {
     return replace2rpx
   }
 }
+
+export function replaceShortcuts(classArray: string[]) {
+  Object.entries(reversedShortCuts).forEach(([classList, shortcut]) => {
+    const classListArray = classList.split(' ').sort()
+    const classListSet = new Set(classListArray)
+    if (classListArray.every((cls) => classArray.includes(cls))) {
+      classArray = classArray.filter((cls) => !classListSet.has(cls))
+      classArray.push(shortcut as string)
+    }
+  })
+  return classArray
+}
+
