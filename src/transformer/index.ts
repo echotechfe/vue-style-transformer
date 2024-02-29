@@ -49,7 +49,7 @@ const propertyMap: Record<string, Function> = {
   overflow,
 }
 
-export function toUnoCSS(css: String) {
+export function toUnoCSS(css: String): string | undefined {
   const splitReg = /([\w-]+)\s*:\s*([.\w\(\)-\s%+'",#\/!]+)/
   const declaration = css.match(splitReg)
   if (!declaration) return
@@ -63,7 +63,7 @@ export function toUnoCSS(css: String) {
     const replace2rpx = result.replace(
       /-([0-9\.]+)(rpx|px)/g,
       (_: string, v: string, unit: string) =>
-        `-${unit === 'rpx' ? (+v / 2).toFixed(0) : v}`
+        `-${unit === 'rpx' ? (+v / 2).toFixed(0) : v}`,
     )
     return replace2rpx
   }
