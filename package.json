@@ -1,6 +1,6 @@
 {
   "name": "vue-style-transformer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,12 +9,25 @@
     "build": "tsup ./src/index.ts ./src/cli.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "gideonsenku",
   "license": "ISC",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
+    },
+    "./cli": {
+      "import": "./src/cli.ts",
+      "require": "./src/cli.ts"
+    },
+    "./transformer": {
+      "import": "./src/transformer/index.ts",
+      "require": "./src/transformer/index.ts"
+    }
+  },
   "dependencies": {
     "@prettier/sync": "^0.5.1",
     "@vue/compiler-sfc": "^3.4.15",
-    "esno": "^4.0.0",
     "gogocode": "^1.0.55",
     "postcss": "^8.4.33",
     "prettier": "^3.2.5",
@@ -24,6 +37,7 @@
     "@types/node": "^20.11.10",
     "@vitest/coverage-istanbul": "^1.2.2",
     "chalk": "^5.3.0",
+    "esno": "^4.0.0",
     "fast-glob": "^3.3.2",
     "postcss-import": "^16.0.1",
     "postcss-preset-env": "^9.4.0",
