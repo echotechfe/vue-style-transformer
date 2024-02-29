@@ -1,8 +1,9 @@
 {
   "name": "vue-style-transformer",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "vitest run --coverage --dir ./test",
     "start": "esno src/index.ts",
@@ -25,6 +26,10 @@
       "require": "./dist/transformer/index.js"
     }
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "dependencies": {
     "@prettier/sync": "^0.5.1",
     "@vue/compiler-sfc": "^3.4.15",

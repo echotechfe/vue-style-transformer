@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup'
 
 export default defineConfig({
   name: 'tsup',
-  target: 'node18',
+  target: 'esnext',
   format: ['cjs', 'esm'],
   clean: true,
   external: ['vite', 'webpack', 'rollup', 'esbuild', 'fast-glob'],
