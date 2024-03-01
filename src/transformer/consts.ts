@@ -1,9 +1,52 @@
+const plattes = [
+  'primary',
+  'secondary',
+  'trade',
+  'white',
+  'default',
+  'success',
+  'warning',
+  'error',
+  'vip',
+]
+
+const platteColors = Object.fromEntries(
+  plattes.flatMap((c) => {
+    return Object.entries({
+      [`${c}-solid-c`]: `var(--du-${c}-solid-color)`,
+      [`${c}-solid-bg`]: `var(--du-${c}-solid-bg)`,
+      [`${c}-c`]: `var(--du-${c}-color)`,
+      [`${c}-soft-bg`]: `var(--du-${c}-soft-bg)`,
+      [`${c}-outline-c`]: `var(--du-${c}-outline-color)`,
+      [`${c}-border`]: `var(--du-${c}-border)`,
+      [`${c}-text-c`]: `var(--du-${c}-text-color)`,
+      [`${c}-solid-disabledtemp-c`]: `var(--du-${c}-solid-disabledtemp-color)`,
+      [`${c}-solid-disabledtemp-bg`]: `var(--du-${c}-solid-disabledtemp-bg)`,
+      [`${c}-disabledtemp-c`]: `var(--du-${c}-disabledtemp-color)`,
+      [`${c}-soft-disabledtemp-bg`]: `var(--du-${c}-soft-disabledtemp-bg)`,
+      [`${c}-outline-disabledtemp-c`]: `var(--du-${c}-outline-disabledtemp-color)`,
+      [`${c}-disabledtemp-border`]: `var(--du-${c}-disabledtemp-border)`,
+      [`${c}-text-disabledtemp-c`]: `var(--du-${c}-text-disabledtemp-color)`,
+      [`${c}-1`]: `var(--du-${c}-1)`,
+      [`${c}-2`]: `var(--du-${c}-2)`,
+      [`${c}-3`]: `var(--du-${c}-3)`,
+      [`${c}-4`]: `var(--du-${c}-4)`,
+      [`${c}-5`]: `var(--du-${c}-5)`,
+      [`${c}-6`]: `var(--du-${c}-6)`,
+      [`${c}-7`]: `var(--du-${c}-7)`,
+      [`${c}-8`]: `var(--du-${c}-8)`,
+      [`${c}-9`]: `var(--du-${c}-9)`,
+    })
+  }),
+)
+
 export const colorMap: any = {
   inherit: 'inherit',
   current: 'currentColor',
   transparent: 'transparent',
   black: '#000',
   white: '#fff',
+  ...platteColors,
 
   neutral: {
     100: 'rgba(0,0,0,0.04)',
@@ -255,5 +298,5 @@ export const reversedShortCuts = Object.entries(shortCuts).reduce(
     })
     return acc
   },
-  {}
+  {},
 )
