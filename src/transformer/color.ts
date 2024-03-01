@@ -21,7 +21,13 @@ export function color(_: string, val: string, prefix: string = 'c') {
   if (extracted) {
     const { variable, defaultValue } = extracted
     if (variable) {
-      return processColor(`var(--${kebabCase(variable)})`, important, prefix)
+      let val
+      if (variable.startsWith('--du-')) {
+        val = `var(--${kebabCase(variable)})`
+      } else {
+        val = `var(--du-${kebabCase(variable)})`
+      }
+      return processColor(val, important, prefix)
     }
     if (defaultValue) {
       return processColor(defaultValue, important, prefix)
