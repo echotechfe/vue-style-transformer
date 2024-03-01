@@ -9,7 +9,7 @@ export function font(key: string, val: string) {
     return `font-num${important}`
   }
   if (key === 'font-style') {
-    if (value === 'normal') return `font-not-italic${important}`
+    if (value === 'normal') return
     return `font-${value}${important}`
   }
 }
