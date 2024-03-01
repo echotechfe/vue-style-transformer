@@ -81,6 +81,3 @@ export function replaceShortcuts(classArray: string[]) {
   })
   return classArray
 }
-
-
-console.log(toUnoCSS('color: var(--primary-solidBg, #7C66FF)'))

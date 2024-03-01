@@ -18,20 +18,20 @@ function processColor(value: string, important: string, prefix: string = 'c') {
 export function color(_: string, val: string, prefix: string = 'c') {
   const [value, important] = transformImportant(val)
   const extracted = extractVarAndOptionallyDefault(value)
+  let ret
   if (extracted) {
     const { variable, defaultValue } = extracted
+    let colorVal = ''
     if (variable) {
-      let val
       if (variable.startsWith('--du-')) {
-        val = `var(--${kebabCase(variable)})`
+        colorVal = `var(--${kebabCase(variable)})`
       } else {
-        val = `var(--du-${kebabCase(variable)})`
+        colorVal = `var(--du-${kebabCase(variable)})`
       }
-      return processColor(val, important, prefix)
     }
-    if (defaultValue) {
-      return processColor(defaultValue, important, prefix)
-    }
+    ret =
+      processColor(colorVal, important, prefix) ||
+      (defaultValue && processColor(defaultValue, important, prefix))
   }
-  return processColor(value, important, prefix)
+  return ret || processColor(value, important, prefix)
 }
