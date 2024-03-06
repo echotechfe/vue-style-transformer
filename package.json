@@ -44,6 +44,7 @@
     "chalk": "^5.3.0",
     "esno": "^4.0.0",
     "fast-glob": "^3.3.2",
+    "glob": "^10.3.10",
     "postcss-import": "^16.0.1",
     "postcss-preset-env": "^9.4.0",
     "postcss-reporter": "^7.1.0",

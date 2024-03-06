@@ -6,6 +6,7 @@ import { compilerCss } from './compilerCss'
 import { replaceShortcuts } from './transformer'
 import { toUnoCSS } from './transformer/index'
 import { processCss } from './processCss'
+import { splitClassNamesString } from './utils'
 
 type RemoveCSSType = {
   className: string
@@ -74,6 +75,25 @@ export async function transform(code: string) {
 
   const removeCSS: RemoveCSSType[] = []
 
+  function getClassNameTransformed(className: string): string[] {
+    if (!classNames.includes(className)) return []
+    const rules = getCSSRules(css, className)
+    const ret: string[] = []
+    const splitReg = /([\w-]+)\s*:\s*([.\w\(\)-\s%+'",#\/!]+)/
+    rules.map((rule) => {
+      const match = rule.match(splitReg)
+      if (!match) return
+      const [declaration, key, val] = match
+      const res = toUnoCSS(declaration)
+      if (res) {
+        removeCSS.push({ className: className, key, val })
+        ret.push(res)
+      }
+    })
+    if (ret.length === 0) return []
+    return replaceShortcuts(ret).map(splitClassNamesString).flat()
+  }
+
   ast
     .find('<template></template>')
     .find([`<$_$ :class="$_$1" $$$0>$$$1</$_$>`, `<$_$ :class="$_$1" $$$0/>`])
@@ -111,31 +131,22 @@ export async function transform(code: string) {
         .find(`"$_$"`)
         .each((n) => {
           n.match[0].forEach(async ({ value }) => {
-            if (classNames.includes(value)) {
-              const rules = getCSSRules(css, value)
-              const ret: string[] = []
-              const splitReg = /([\w-]+)\s*:\s*([.\w\(\)-\s%+'",#\/!]+)/
-              rules.map((rule) => {
-                const match = rule.match(splitReg)
-                if (!match) return
-                const [declaration, key, val] = match
-                const res = toUnoCSS(declaration)
-                if (res) {
-                  removeCSS.push({ className: value, key, val })
-                  ret.push(res)
-                }
-              })
-              if (ret.length) {
-                const replaceRet = replaceShortcuts(ret)
-                n.replace(`"${value}"`, `"${value} ${replaceRet.join(' ')}"`)
-              }
+            const targetClassNames = splitClassNamesString(value)
+            const newClassNames = targetClassNames
+              .map(getClassNameTransformed)
+              .flat()
+            if (newClassNames.length > 0) {
+              n.replace(
+                `"${value}"`,
+                `"${[...new Set([...targetClassNames, ...newClassNames])].join(' ')}"`,
+              )
             }
           })
         })
         .root()
         .generate()
-      const nodeContent = node.match[1][0].node
-      Object.assign(nodeContent, {
+
+      Object.assign(node.match[1][0].node, {
         content: newContent.replace(/"/g, "'"),
       })
     })
@@ -143,48 +154,12 @@ export async function transform(code: string) {
     .find('<template></template>')
     .find([`<$_$ class="$_$1" $$$1>$$$2</$_$>`, `<$_$ class="$_$1" $$$1/>`])
     .each((node) => {
-      const classList = node.match[1][0].value.split(' ')
-      let hasMatched = false
-      classList.forEach((i, idx) => {
-        if (classNames.includes(i)) {
-          hasMatched = true
-          classList[idx] = `'${i}'`
-        }
+      const classNamesString = node.match[1][0].value
+      const targetClassNames = splitClassNamesString(classNamesString)
+      const newClassNames = targetClassNames.map(getClassNameTransformed).flat()
+      Object.assign(node.match[1][0].node, {
+        content: `${[...new Set([...targetClassNames, ...newClassNames])].join(' ')}`,
       })
-
-      if (hasMatched) {
-        const newContentAst = $(JSON.stringify(classList))
-        newContentAst.find(`'$_$'`).each((n) => {
-          const str = n.match[0][0].value
-          if (str.startsWith("'") && str.endsWith("'")) {
-            const value = str.replace(/'/g, '')
-            const rules = getCSSRules(css, value)
-            const ret: string[] = []
-            const splitReg = /([\w-]+)\s*:\s*([.\w\(\)-\s%+'",#\/!]+)/
-            rules.map((rule) => {
-              const match = rule.match(splitReg)
-              if (!match) return
-              const [declaration, key, val] = match
-              const res = toUnoCSS(declaration)
-              if (res) {
-                removeCSS.push({ className: value, key, val })
-                ret.push(res)
-              }
-            })
-            if (ret.length) {
-              const replaceRet = replaceShortcuts(ret)
-              n.replaceBy(`'${value} ${replaceRet.join(' ')}'`)
-            }
-          }
-        })
-
-        const nodeContent = node.match[1][0].node
-        Object.assign(nodeContent, {
-          content: JSON.parse(newContentAst.generate())
-            .join(' ')
-            .replaceAll(/\'/g, ''),
-        })
-      }
     })
 
   for (const task of unique(removeCSS)) {

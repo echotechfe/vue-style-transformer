@@ -40,6 +40,9 @@ devDependencies:
   fast-glob:
     specifier: ^3.3.2
     version: 3.3.2
+  glob:
+    specifier: ^10.3.10
+    version: 10.3.10
   postcss-import:
     specifier: ^16.0.1
     version: 16.0.1(postcss@8.4.33)
